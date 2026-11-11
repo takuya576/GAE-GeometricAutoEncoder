@@ -29,6 +29,7 @@ import hashlib
 import json
 import os
 import os.path as osp
+import tempfile
 import cv2
 import numpy as np
 from PIL import Image
@@ -46,7 +47,13 @@ from cut3r_data.base.fast_meta_index import (
 
 
 _CAM_CACHE_MAX = 4096
-_LOCAL_CACHE_ROOT = "/local-ssd/scannetpp_rgb_cache"
+# Node-local index cache: $GAE_LOCAL_CACHE_ROOT, else /local-ssd when present,
+# else the temp dir (hosts without /local-ssd usually cannot create it).
+_LOCAL_CACHE_ROOT = osp.join(
+    os.environ.get("GAE_LOCAL_CACHE_ROOT")
+    or ("/local-ssd" if osp.isdir("/local-ssd") else tempfile.gettempdir()),
+    "scannetpp_rgb_cache",
+)
 
 
 class ScanNetppRGB_Multi(BaseMultiViewDataset):

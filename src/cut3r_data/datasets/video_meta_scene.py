@@ -36,6 +36,7 @@ import hashlib
 import json
 import os
 import os.path as osp
+import tempfile
 import cv2
 import numpy as np
 from PIL import Image
@@ -58,7 +59,13 @@ from cut3r_data.base.fast_meta_index import (
 
 
 _CAM_CACHE_MAX = 4096
-_LOCAL_CACHE_ROOT = "/local-ssd/video_meta_scene_cache"
+# Node-local index cache: $GAE_LOCAL_CACHE_ROOT, else /local-ssd when present,
+# else the temp dir (hosts without /local-ssd usually cannot create it).
+_LOCAL_CACHE_ROOT = osp.join(
+    os.environ.get("GAE_LOCAL_CACHE_ROOT")
+    or ("/local-ssd" if osp.isdir("/local-ssd") else tempfile.gettempdir()),
+    "video_meta_scene_cache",
+)
 
 # Prebuilt index pickles loaded directly (skip lock/copy/build) unless the
 # matching ``VMS_INDEX_<TAG>`` / ``VMS_INDEX_PATH`` env overrides it. Keyed by
